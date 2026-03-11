@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://defect-detection-2tz9.onrender.com/api/:path*" },
+    { "source": "/outputs/:path*", "destination": "https://defect-detection-2tz9.onrender.com/outputs/:path*" },
+    { "source": "/reports/:path*", "destination": "https://defect-detection-2tz9.onrender.com/reports/:path*" },
+    { "source": "/images/:path*", "destination": "https://defect-detection-2tz9.onrender.com/images/:path*" },
+    { "source": "/samples-view", "destination": "https://defect-detection-2tz9.onrender.com/samples-view" }
+  ]
+}

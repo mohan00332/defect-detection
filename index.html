@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manufacturing Defect Detection Dashboard</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+  <script>
+    window.API_BASE = '/api';
+    window.LIVE_SUPPORTED = true;
+    window.REPORTS_SUPPORTED = true;
+    window.SUPABASE_URL = '';
+    window.SUPABASE_ANON_KEY = '';
+  </script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <div class="brand-title">Industrial AI</div>
+          <div class="brand-sub">Defect Insight</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-panel="dashboard">Dashboard</button>
+        <button class="nav-item" data-panel="analytics">Analytics</button>
+        <button class="nav-item" data-panel="reports">Reports</button>
+      </nav>
+
+      <div class="category">
+        <div class="section-label">Category</div>
+        <div class="category-buttons">
+          <button class="chip" data-category="All">
+            <svg class="chip-icon" viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="2" y="2" width="5" height="5" rx="1"></rect>
+              <rect x="9" y="2" width="5" height="5" rx="1"></rect>
+              <rect x="2" y="9" width="5" height="5" rx="1"></rect>
+              <rect x="9" y="9" width="5" height="5" rx="1"></rect>
+            </svg>
+            All
+          </button>
+          <button class="chip active" data-category="Nut">
+            <svg class="chip-icon" viewBox="0 0 16 16" aria-hidden="true">
+              <polygon points="8,1 14,4.5 14,11.5 8,15 2,11.5 2,4.5"></polygon>
+              <circle cx="8" cy="8" r="3.2"></circle>
+            </svg>
+            Nut
+          </button>
+          <button class="chip" data-category="Bolt">
+            <svg class="chip-icon" viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="3" y="2" width="10" height="4" rx="1"></rect>
+              <rect x="6.2" y="6" width="3.6" height="8" rx="1"></rect>
+            </svg>
+            Bolt
+          </button>
+          <button class="chip" data-category="Gear">
+            <svg class="chip-icon" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M7 1h2l.4 2.1 1.8.8 1.9-1.1 1.4 1.4-1.1 1.9.8 1.8 2.1.4v2l-2.1.4-.8 1.8 1.1 1.9-1.4 1.4-1.9-1.1-1.8.8L9 15H7l-.4-2.1-1.8-.8-1.9 1.1-1.4-1.4 1.1-1.9-.8-1.8L0 9V7l2.1-.4.8-1.8-1.1-1.9L3.2 1.5l1.9 1.1 1.8-.8L7 1z"></path>
+              <circle cx="8" cy="8" r="3"></circle>
+            </svg>
+            Gear
+          </button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="expectedCount">Expected Production Count</label>
+        <input type="number" id="expectedCount" placeholder="e.g. 120" min="0" />
+      </div>
+
+      <div class="quick-actions">
+        <button id="downloadReport" class="primary">Download Report</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <div class="title">Real-Time Manufacturing Defect Detection</div>
+          <div class="subtitle">Computer vision inspection for nuts, bolts, and gears</div>
+        </div>
+        <div class="status">
+          <span class="pulse"></span>
+          <span id="systemStatus">Idle</span>
+        </div>
+      </header>
+
+      <section class="panel active" id="panel-dashboard">
+        <div class="stacked-cards">
+          <div class="stack-card">
+            <div class="stack-title">Detection Preview</div>
+            <div class="result-preview">
+              <div class="preview-placeholder" id="previewPlaceholder">
+                <div class="preview-title">No result yet</div>
+                <div class="preview-text">Upload image/video or use live camera.</div>
+              </div>
+              <div class="preview-corner" id="previewCorner">Idle</div>
+              <img id="liveFeedDashboard" class="preview-media hidden" alt="Live Feed" />
+              <img id="imagePreview" class="preview-media hidden" alt="Detection Preview" />
+              <video id="videoPreview" class="preview-media hidden" controls></video>
+            </div>
+          </div>
+
+          <div class="stack-card">
+            <div class="stack-title">Live Detection</div>
+            <div class="controls">
+              <button id="startCameraDashboard" class="primary">Start Camera</button>
+              <button id="stopCameraDashboard" class="ghost">Stop Camera</button>
+            </div>
+          </div>
+
+          <div class="stack-card">
+            <div class="stack-title">Samples from Test Set</div>
+            <div class="sample-row" id="sampleRow">
+              <div class="sample-empty">Loading samples...</div>
+            </div>
+            <a class="stack-link" href="/api/samples-view" target="_blank">View Test Set ?</a>
+          </div>
+
+          <div class="stack-card">
+            <div class="stack-title">Upload Image or Video File</div>
+            <div class="upload-card">
+              <div id="uploadDrop" class="upload-drop">
+                <div class="upload-text">Drop file here or</div>
+              <label class="upload-btn">
+                Select File
+                <input type="file" id="uploadFileInput" accept=".jpg,.jpeg,.png,.mp4,.avi" />
+              </label>
+              </div>
+              <div class="upload-meta">
+                <div id="uploadFileName" class="upload-filename">No file selected</div>
+                <div class="upload-progress">
+                  <div id="uploadProgressBar" class="upload-progress-bar"></div>
+                </div>
+                <div id="uploadStatus" class="upload-status">Waiting for file</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack-card">
+            <div class="stack-title">Paste Image URL</div>
+            <div class="url-row">
+              <input type="text" id="imageUrlInput" placeholder="Paste a link..." />
+              <button id="detectImageUrl" class="primary">Detect</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-live">
+        <div class="panel-title">Live Camera Detection</div>
+        <div class="preview">
+          <img id="liveFeed" class="preview-media" alt="Live Feed" />
+        </div>
+        <div class="controls">
+          <button id="startCamera" class="primary">Start Camera</button>
+          <button id="stopCamera" class="ghost">Stop Camera</button>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-image">
+        <div class="panel-title">Image Detection</div>
+        <div class="upload-card">
+          <input type="file" id="imageFile" accept="image/*" />
+          <button id="detectImage" class="primary">Run Detection</button>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-video">
+        <div class="panel-title">Video Detection</div>
+        <div class="upload-card">
+          <input type="file" id="videoFile" accept="video/*" />
+          <button id="detectVideo" class="primary">Process Video</button>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-analytics">
+        <div class="panel-title">Analytics</div>
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <div class="analytics-label">Total Detected</div>
+            <div class="analytics-value" id="analyticsTotalDetected">0</div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-label">Total Defects</div>
+            <div class="analytics-value" id="analyticsTotalDefect">0</div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-label">Good Rate</div>
+            <div class="analytics-value" id="analyticsGoodRate">-</div>
+          </div>
+        </div>
+        <div class="analytics-charts">
+          <div class="chart-card">
+            <div class="chart-title">Defect vs Good (Last 7 Days)</div>
+            <div id="trendChart" class="bar-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Category Defects (Total)</div>
+            <div id="categoryChart" class="bar-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Live Defect Trend (Last 60s)</div>
+            <div id="liveChart" class="bar-chart live-chart"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-reports">
+        <div class="panel-title">Reports</div>
+        <div class="report-card">
+          <div>Generate PDF reports for every detection run.</div>
+          <button class="primary" id="downloadReportSecondary">Download Latest Report</button>
+        </div>
+        <div class="report-card">
+          <div>Export daily report in Excel or PDF.</div>
+          <div class="url-row">
+            <input type="date" id="reportDate" />
+            <button class="primary" id="downloadDailyExcel">Download Excel</button>
+            <button class="ghost" id="downloadDailyPdf">Download PDF</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="stats">
+      <div class="stats-header">
+        <div class="section-label">Detection Statistics</div>
+        <div class="last-update" id="lastUpdate">No runs yet</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-title">Current Run</div>
+        <div class="stat-line" id="currentCategory">Category: -</div>
+        <div class="stat-line" id="currentDetected">Detected Count: -</div>
+        <div class="stat-line" id="currentDefect">Defect Count: -</div>
+        <div class="stat-line" id="currentGood">Non-Defect Count: -</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-title-row">
+          <div class="stat-title">Category Totals</div>
+          <button id="resetCategoryTotals" class="ghost small">Reset</button>
+        </div>
+        <div class="category-totals">
+          <div class="category-card" id="nutStats">
+            <div class="category-name">Nut</div>
+            <div class="category-metrics">Detected: <span id="nutDetected">0</span></div>
+            <div class="category-metrics">Defects: <span id="nutDefect">0</span></div>
+            <div class="category-metrics">Non-Defects: <span id="nutGood">0</span></div>
+          </div>
+          <div class="category-card" id="boltStats">
+            <div class="category-name">Bolt</div>
+            <div class="category-metrics">Detected: <span id="boltDetected">0</span></div>
+            <div class="category-metrics">Defects: <span id="boltDefect">0</span></div>
+            <div class="category-metrics">Non-Defects: <span id="boltGood">0</span></div>
+          </div>
+          <div class="category-card" id="gearStats">
+            <div class="category-name">Gear</div>
+            <div class="category-metrics">Detected: <span id="gearDetected">0</span></div>
+            <div class="category-metrics">Defects: <span id="gearDefect">0</span></div>
+            <div class="category-metrics">Non-Defects: <span id="gearGood">0</span></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

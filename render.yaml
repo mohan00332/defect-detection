@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: manufacturing-defect-detection
+    env: docker
+    plan: free
+    autoDeploy: true
+    dockerfilePath: ./Dockerfile

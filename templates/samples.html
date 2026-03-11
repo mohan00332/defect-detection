@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Set Samples</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <div class="samples-page">
+    <div class="samples-header">
+      <div class="samples-title">Samples from Test Set</div>
+      <a class="stack-link" href="/">Back to Dashboard</a>
+    </div>
+    <div class="samples-grid">
+      {% for img in (sample_images|default([])) %}
+      <div class="samples-card">
+        <img src="{{ img.url }}" alt="{{ img.name }}" data-sample-url="{{ img.url }}" />
+        <div class="samples-name">{{ img.name }}</div>
+      </div>
+      {% else %}
+      <div class="sample-empty">No samples found in images/</div>
+      {% endfor %}
+    </div>
+  </div>
+  <script>
+    const sampleCards = document.querySelectorAll('[data-sample-url]');
+    sampleCards.forEach(img => {
+      img.addEventListener('click', () => {
+        const url = img.dataset.sampleUrl || img.src;
+        if (!url) return;
+        window.location.href = `/?sample=${encodeURIComponent(url)}`;
+      });
+    });
+  </script>
+</body>
+</html>
