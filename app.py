@@ -567,6 +567,11 @@ def inject_sample_images():
     return {"sample_images": _get_sample_images()}
 
 
+@app.route("/health")
+def health():
+    return jsonify({"ok": True})
+
+
 @app.route("/")
 def index():
     return render_template("index.html", sample_images=_get_sample_images())
