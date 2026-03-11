@@ -1234,5 +1234,30 @@ def analytics_summary():
     })
 
 
+def _add_api_alias(rule, view_func, methods=None):
+    endpoint = f"api_{view_func.__name__}_{rule.strip('/').replace('/', '_') or 'root'}"
+    app.add_url_rule(f"/api{rule}", endpoint=endpoint, view_func=view_func, methods=methods)
+
+
+_add_api_alias("/health", health, ["GET"])
+_add_api_alias("/samples-json", samples_json, ["GET"])
+_add_api_alias("/start_camera", start_camera, ["POST"])
+_add_api_alias("/stop_camera", stop_camera, ["POST"])
+_add_api_alias("/live_stats", live_stats, ["GET"])
+_add_api_alias("/video_feed", video_feed, ["GET"])
+_add_api_alias("/detect_image", detect_image, ["POST"])
+_add_api_alias("/detect_image_url", detect_image_url, ["POST"])
+_add_api_alias("/detect_video", detect_video, ["POST"])
+_add_api_alias("/upload", upload, ["POST"])
+_add_api_alias("/stats", stats, ["GET"])
+_add_api_alias("/reset_stats", reset_stats, ["POST"])
+_add_api_alias("/report/latest", report_latest, ["GET"])
+_add_api_alias("/report/daily.csv", report_daily_csv, ["GET"])
+_add_api_alias("/report/daily.pdf", report_daily_pdf, ["GET"])
+_add_api_alias("/report/daily.xlsx", report_daily_xlsx, ["GET"])
+_add_api_alias("/analytics/summary", analytics_summary, ["GET"])
+_add_api_alias("/model_info", model_info, ["GET"])
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
