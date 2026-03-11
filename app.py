@@ -91,6 +91,27 @@ _stats_meta = {"last_reset": None}
 
 STATS_PATH = os.path.join(APP_ROOT, "stats.json")
 LOG_PATH = os.path.join(REPORT_DIR, "detections_log.csv")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY")
+SUPABASE_TABLE = os.environ.get("SUPABASE_TABLE", "detections")
+
+
+def _log_to_supabase(payload):
+    key = SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY
+    if not SUPABASE_URL or not key:
+        return
+    try:
+        url = f"{SUPABASE_URL}/rest/v1/{SUPABASE_TABLE}"
+        headers = {
+            "apikey": key,
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal",
+        }
+        requests.post(url, headers=headers, json=payload, timeout=5)
+    except Exception:
+        pass
 
 
 def _load_stats():
@@ -346,6 +367,14 @@ def _record_detection(category, expected_count, detected, defect, good, output_i
 
     _append_to_sheet(row)
     _append_to_local_log(row)
+    _log_to_supabase({
+        "timestamp": now.isoformat(),
+        "category": category,
+        "expected_count": expected_count,
+        "detected": detected,
+        "defect": defect,
+        "good": good,
+    })
 
     data = {
         "date": now.strftime("%Y-%m-%d"),
